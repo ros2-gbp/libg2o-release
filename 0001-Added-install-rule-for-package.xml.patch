@@ -1,0 +1,24 @@
+From c0d17ddcfb13796d52f7f26237b343e4fc612c44 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Christoph=20R=C3=B6smann?=
+ <christoph.roesmann@tu-dortmund.de>
+Date: Thu, 23 Jan 2020 18:07:23 +0100
+Subject: [PATCH] Added install rule for package.xml
+
+---
+ CMakeLists.txt | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a3f66dd..841e0ce 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -413,3 +413,6 @@ endif()
+ # Include the subdirectories
+ add_subdirectory(EXTERNAL)
+ add_subdirectory(g2o)
++
++# Install colcon package.xml
++install(FILES package.xml DESTINATION share/libg2o)
+-- 
+2.17.1
+
