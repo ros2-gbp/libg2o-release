@@ -25,6 +25,10 @@
   <build_depend>opengl</build_depend>
   <build_depend>suitesparse</build_depend>
   
+  <exec_depend>eigen</exec_depend>
+  <exec_depend>opengl</exec_depend>
+  <exec_depend>suitesparse</exec_depend>
+  
   <export>
     <build_type>ament_cmake</build_type>
   </export>
