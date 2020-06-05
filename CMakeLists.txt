@@ -546,3 +546,6 @@ endif()
 
 # Include the subdirectories
 add_subdirectory(g2o)
+
+# Install colcon package.xml
+install(FILES package.xml DESTINATION share/libg2o)
