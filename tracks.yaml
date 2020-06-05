@@ -39,10 +39,10 @@ tracks:
       :{release_inc}
     devel_branch: null
     last_release: master
-    last_version: 2020.05.29
+    last_version: 2020.5.29
     name: upstream
     patches: foxy
-    release_inc: '3'
+    release_inc: '1'
     release_repo_url: null
     release_tag: :{ask}
     ros_distro: foxy
