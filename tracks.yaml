@@ -41,11 +41,11 @@ tracks:
     last_release: master
     last_version: 2019.11.23
     name: upstream
-    patches: eloquent
+    patches: foxy
     release_inc: '4'
     release_repo_url: null
     release_tag: :{ask}
-    ros_distro: eloquent
+    ros_distro: foxy
     vcs_type: git
     vcs_uri: https://github.com/RainerKuemmerle/g2o.git
     version: :{ask}
