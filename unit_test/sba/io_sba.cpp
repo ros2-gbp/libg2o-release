@@ -1,5 +1,5 @@
 // g2o - General Graph Optimization
-// Copyright (C) 2011 H. Strasdat
+// Copyright (C) 2014 R. Kuemmerle, G. Grisetti, W. Burgard
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -24,25 +24,53 @@
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef G2O_SE3_OPS_H
-#define G2O_SE3_OPS_H
+#include <sstream>
 
-#include <Eigen/Core>
-#include <Eigen/Geometry>
+#include "g2o/types/sba/types_sba.h"
+#include "gtest/gtest.h"
+#include "unit_test/test_helper/io.h"
+#include "unit_test/test_helper/random_state.h"
 
-#include "g2o_types_slam3d_api.h"
+using namespace std;
+using namespace g2o;
 
-namespace g2o {
+struct RandomSBACam {
+  static SBACam create() { return SBACam(); } // TODO Randomize
+  static bool isApprox(const SBACam& a, const SBACam& b) {
+    return a.toVector().isApprox(b.toVector(), 1e-5) && a.Kcam.isApprox(b.Kcam, 1e-5);
+  }
+};
 
-  inline G2O_TYPES_SLAM3D_API Matrix3 skew(const Vector3&v);
-  inline G2O_TYPES_SLAM3D_API Vector3 deltaR(const Matrix3& R);
-  inline G2O_TYPES_SLAM3D_API Vector2 project(const Vector3&);
-  inline G2O_TYPES_SLAM3D_API Vector3 project(const Vector4&);
-  inline G2O_TYPES_SLAM3D_API Vector3 unproject(const Vector2&);
-  inline G2O_TYPES_SLAM3D_API Vector4 unproject(const Vector3&);
-
-  #include "se3_ops.hpp"
-
+/*
+ * VERTEX Tests
+ */
+TEST(IoSba, ReadWriteVertexIntrinsics) {
+  readWriteVectorBasedVertex<VertexIntrinsics>();
 }
 
-#endif //MATH_STUFF
+TEST(IoSba, ReadWriteVertexCam) {
+  readWriteVectorBasedVertex<VertexCam, RandomSBACam>();
+}
+
+TEST(IoSba, ReadWriteVertexSBAPointXYZ) {
+  readWriteVectorBasedVertex<VertexSBAPointXYZ>();
+}
+
+/*
+ * EDGE Tests
+ */
+TEST(IoSba, ReadWriteEdgeProjectP2MC) {
+  readWriteVectorBasedEdge<EdgeProjectP2MC>();
+}
+
+TEST(IoSba, ReadWriteEdgeProjectP2SC) {
+  readWriteVectorBasedEdge<EdgeProjectP2SC>();
+}
+
+TEST(IoSba, ReadWriteEdgeSBACam) {
+  readWriteVectorBasedEdge<EdgeSBACam, RandomSBACam>();
+}
+
+TEST(IoSba, ReadWriteEdgeSBAScale) {
+  readWriteVectorBasedEdge<EdgeSBAScale, internal::RandomDouble>();
+}
