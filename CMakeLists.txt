@@ -154,6 +154,7 @@ endif(G2O_USE_OPENMP)
 
 # OpenGL is used in the draw actions for the different types, as well
 # as for creating the GUI itself
+set(OpenGL_GL_PREFERENCE "GLVND")
 find_package(OpenGL)
 
 # If OpenGL was found, use the import target if available. If not, use old-style includes
@@ -344,6 +345,13 @@ if(MSVC)
   add_definitions("/wd4267") # Conversion during return
   add_definitions("/wd4522") # Duplicated operator=() in Eigen headers
 
+  # Bessel  include(CheckIfUnderscorePrefixedBesselFunctionsExist)
+  include(CheckIfUnderscorePrefixedBesselFunctionsExist)
+  check_if_underscore_prefixed_bessel_functions_exist(HAVE_UNDERSCORE_PREFIXED_BESSEL_FUNCTIONS)
+  if (HAVE_UNDERSCORE_PREFIXED_BESSEL_FUNCTIONS)
+    add_definitions(-DCERES_MSVC_USE_UNDERSCORE_PREFIXED_BESSEL_FUNCTIONS)
+  endif()
+
 endif(MSVC)
 
 # C++11 support
@@ -415,6 +423,3 @@ endif()
 # Include the subdirectories
 add_subdirectory(EXTERNAL)
 add_subdirectory(g2o)
-
-# Install colcon package.xml
-install(FILES package.xml DESTINATION share/libg2o)

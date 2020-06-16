@@ -1,5 +1,5 @@
 // g2o - General Graph Optimization
-// Copyright (C) 2011 H. Strasdat
+// Copyright (C) 2014 R. Kuemmerle, G. Grisetti, W. Burgard
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -24,25 +24,39 @@
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef G2O_SE3_OPS_H
-#define G2O_SE3_OPS_H
-
-#include <Eigen/Core>
-#include <Eigen/Geometry>
-
-#include "g2o_types_slam3d_api.h"
+#include "g2o/core/eigen_types.h"
+#include "g2o/stuff/sampler.h"
+#include "g2o/types/slam3d/se3quat.h"
 
 namespace g2o {
-
-  inline G2O_TYPES_SLAM3D_API Matrix3 skew(const Vector3&v);
-  inline G2O_TYPES_SLAM3D_API Vector3 deltaR(const Matrix3& R);
-  inline G2O_TYPES_SLAM3D_API Vector2 project(const Vector3&);
-  inline G2O_TYPES_SLAM3D_API Vector3 project(const Vector4&);
-  inline G2O_TYPES_SLAM3D_API Vector3 unproject(const Vector2&);
-  inline G2O_TYPES_SLAM3D_API Vector4 unproject(const Vector3&);
-
-  #include "se3_ops.hpp"
-
+namespace internal {
+inline Isometry3 randomIsometry3() {
+  Eigen::Vector3d rotAxisAngle = Eigen::Vector3d::Random();
+  rotAxisAngle += Eigen::Vector3d::Random();
+  Eigen::AngleAxisd rotation(rotAxisAngle.norm(), rotAxisAngle.normalized());
+  Eigen::Isometry3d result = (Eigen::Isometry3d)rotation.toRotationMatrix();
+  result.translation() = Eigen::Vector3d::Random();
+  return result;
 }
 
-#endif //MATH_STUFF
+struct RandomSE3Quat {
+  static SE3Quat create() {
+    SE3Quat result(Quaternion::UnitRandom(), Vector3::Random());
+    result.normalizeRotation();
+    return result;
+  }
+  static bool isApprox(const SE3Quat& a, const SE3Quat& b) { return a.toVector().isApprox(b.toVector(), 1e-5); }
+};
+
+struct RandomIsometry3 {
+  static Isometry3 create() { return randomIsometry3(); }
+  static bool isApprox(const Isometry3& a, const Isometry3& b) { return a.isApprox(b, 1e-5); }
+};
+
+struct RandomDouble {
+  static double create() { return g2o::Sampler::uniformRand(-1., 1.); }
+  static bool isApprox(const double& a, const double& b) { return std::abs(a - b) < 1e-5; }
+};
+
+}  // namespace internal
+}  // namespace g2o
