@@ -1,1 +1,1 @@
-{"base": "e600068", "parent": "debian/rolling/libg2o", "previous": "f94c8b9", "trim": "", "trimbase": ""}
+{"base": "2b920f9", "parent": "debian/galactic/libg2o", "previous": "bc73bd5", "trim": "", "trimbase": ""}
