@@ -33,7 +33,7 @@
 
 namespace g2o {
 
-EdgeSE2LotsOfXY::EdgeSE2LotsOfXY() : BaseMultiEdge<-1, VectorX>(), _observedPoints(0) { resize(0); }
+EdgeSE2LotsOfXY::EdgeSE2LotsOfXY() : BaseVariableSizedEdge<-1, VectorX>(), _observedPoints(0) { resize(0); }
 
 void EdgeSE2LotsOfXY::computeError() {
   VertexSE2* pose = static_cast<VertexSE2*>(_vertices[0]);
@@ -76,7 +76,7 @@ bool EdgeSE2LotsOfXY::read(std::istream& is) {
 
 bool EdgeSE2LotsOfXY::write(std::ostream& os) const {
   // write number of observed points
-  os << _observedPoints;
+  os << "|| " << _observedPoints;
 
   // write measurements
   for (unsigned int i = 0; i < _observedPoints; i++) {

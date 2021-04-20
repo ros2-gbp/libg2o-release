@@ -1,14 +1,4 @@
-sudo: required
-dist: bionic
 language: cpp
-
-os:
-  - linux
-  - osx
-
-env:
-  global:
-    - MAKEFLAGS="-j 2"
 
 notifications:
   email:
@@ -17,41 +7,66 @@ notifications:
     on_success: change # default: change
     on_failure: always # default: always
 
-compiler:
-  - gcc
-  - clang
+env:
+  global:
+    - DO_COVERAGE=OFF
+
+# where do we want to build
+matrix:
+  include:
+    - os: linux
+      arch: amd64
+      compiler: gcc
+      dist: focal
+      env: DO_COVERAGE=ON
+    - os: linux
+      arch: amd64
+      compiler: clang
+      dist: focal
+    - os: osx
+      arch: amd64
+      osx_image: xcode12.2
 
 before_install:
+  - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$DO_COVERAGE" = "ON" ]; then
+      echo "Activating code coverage build";
+      export DO_COVERAGE_BUILD=ON;
+    else
+      export DO_COVERAGE_BUILD=OFF;
+    fi
   - env | sort
 
-install:
-  - script/install-deps-${TRAVIS_OS_NAME}.sh
+# install:
+#   - script/install-deps-${TRAVIS_OS_NAME}.sh
 
 before_script:
   - mkdir build
   - cd build
-  - if [[ "$CC" == "gcc" && "$TRAVIS_OS_NAME" == "linux" ]]; then
-      export CC=gcc-8 ;
-      export CXX=g++-8 ;
-    fi
   - cmake --version
-  - cmake -DBUILD_UNITTESTS=ON ..
+  - cmake -DBUILD_UNITTESTS=ON -DBUILD_CODE_COVERAGE=$DO_COVERAGE_BUILD -DCMAKE_BUILD_TYPE=Debug ..
   - cat g2o/config.h
 
 script:
-  - make
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      ctest --extra-verbose ;
+  - make -j $(nproc)
+  - ctest --extra-verbose --output-on-failure
+
+after_success:
+  - if [ "$DO_COVERAGE_BUILD" = "ON" ]; then
+      echo "Uploading to codecov";
+      bash $TRAVIS_BUILD_DIR/build/codecov.sh;
     fi
 
-# right now only build the master branch
-branches:
-  only:
-    - master
-
-matrix:
-  exclude:
-    - os: osx
-      compiler: gcc
-  allow_failures:
-    - os: osx
+# installing dependencies
+addons:
+  apt: # linux
+    packages:
+      - libeigen3-dev
+      - qtdeclarative5-dev
+      - qt5-qmake
+      - libqglviewer-dev-qt5
+      - libsuitesparse-dev
+      - lcov
+  homebrew: # mac os
+    packages:
+      - cmake
+      - eigen

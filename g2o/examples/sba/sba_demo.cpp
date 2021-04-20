@@ -42,8 +42,8 @@
 
 #if defined G2O_HAVE_CHOLMOD
 #include "g2o/solvers/cholmod/linear_solver_cholmod.h"
-#elif defined G2O_HAVE_CSPARSE
-#include "g2o/solvers/csparse/linear_solver_csparse.h"
+#else
+#include "g2o/solvers/eigen/linear_solver_eigen.h"
 #endif
 
 using namespace Eigen;
@@ -120,11 +120,9 @@ int main(int argc, const char* argv[])
 #ifdef G2O_HAVE_CHOLMOD
 	cerr << "Using CHOLMOD" << endl;
     linearSolver = g2o::make_unique<g2o::LinearSolverCholmod<g2o::BlockSolver_6_3::PoseMatrixType>>();
-#elif defined G2O_HAVE_CSPARSE
-    linearSolver = g2o::make_unique<g2o::LinearSolverCSparse<g2o::BlockSolver_6_3::PoseMatrixType>>();
-	cerr << "Using CSPARSE" << endl;
 #else
-#error neither CSparse nor Cholmod are available
+    linearSolver = g2o::make_unique<g2o::LinearSolverEigen<g2o::BlockSolver_6_3::PoseMatrixType>>();
+	cerr << "Using CSPARSE" << endl;
 #endif
   }
 
@@ -197,8 +195,8 @@ int main(int argc, const char* argv[])
   // add point projections to this vertex
   for (size_t i=0; i<true_points.size(); ++i)
   {
-    g2o::VertexSBAPointXYZ * v_p
-        = new g2o::VertexSBAPointXYZ();
+    g2o::VertexPointXYZ * v_p
+        = new g2o::VertexPointXYZ();
 
 
     v_p->setId(point_id);
@@ -341,8 +339,8 @@ int main(int argc, const char* argv[])
       exit(-1);
     }
 
-    g2o::VertexSBAPointXYZ * v_p
-        = dynamic_cast< g2o::VertexSBAPointXYZ * > (v_it->second);
+    g2o::VertexPointXYZ * v_p
+        = dynamic_cast< g2o::VertexPointXYZ * > (v_it->second);
 
     if (v_p==0)
     {

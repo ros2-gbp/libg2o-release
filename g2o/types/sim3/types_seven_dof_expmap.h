@@ -50,6 +50,11 @@
 #endif
 namespace g2o {
 
+// explicit instantiation of BaseVertex, if not instantiated causes already defined error in some cases (msvc debug only)
+// see links below
+// https://stackoverflow.com/questions/44960760/msvc-dll-exporting-class-that-inherits-from-template-cause-lnk2005-already-defin
+// https://developercommunity.visualstudio.com/content/problem/224597/linker-failing-because-of-multiple-definitions-of.html
+template class BaseVertex<7, Sim3>;
 
 /**
  * \brief Sim3 Vertex, (x,y,z,qw,qx,qy,qz)
@@ -141,7 +146,7 @@ class G2O_TYPES_SIM3_API VertexSim3Expmap : public BaseVertex<7, Sim3>
 
 
 /**/
-class G2O_TYPES_SIM3_API EdgeSim3ProjectXYZ : public  BaseBinaryEdge<2, Vector2,  VertexSBAPointXYZ, VertexSim3Expmap>
+class G2O_TYPES_SIM3_API EdgeSim3ProjectXYZ : public  BaseBinaryEdge<2, Vector2,  VertexPointXYZ, VertexSim3Expmap>
 {
   public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -152,7 +157,7 @@ class G2O_TYPES_SIM3_API EdgeSim3ProjectXYZ : public  BaseBinaryEdge<2, Vector2,
     void computeError()
     {
       const VertexSim3Expmap* v1 = static_cast<const VertexSim3Expmap*>(_vertices[1]);
-      const VertexSBAPointXYZ* v2 = static_cast<const VertexSBAPointXYZ*>(_vertices[0]);
+      const VertexPointXYZ* v2 = static_cast<const VertexPointXYZ*>(_vertices[0]);
 
       Vector2 obs(_measurement);
       _error = obs-v1->cam_map1(project(v1->estimate().map(v2->estimate())));
@@ -163,7 +168,7 @@ class G2O_TYPES_SIM3_API EdgeSim3ProjectXYZ : public  BaseBinaryEdge<2, Vector2,
 };
 
 /**/
-class G2O_TYPES_SIM3_API EdgeInverseSim3ProjectXYZ : public BaseBinaryEdge<2, Vector2, VertexSBAPointXYZ, VertexSim3Expmap> {
+class G2O_TYPES_SIM3_API EdgeInverseSim3ProjectXYZ : public BaseBinaryEdge<2, Vector2, VertexPointXYZ, VertexSim3Expmap> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   EdgeInverseSim3ProjectXYZ();
@@ -172,7 +177,7 @@ class G2O_TYPES_SIM3_API EdgeInverseSim3ProjectXYZ : public BaseBinaryEdge<2, Ve
 
   void computeError() {
     const VertexSim3Expmap *v1 = static_cast<const VertexSim3Expmap *>(_vertices[1]);
-    const VertexSBAPointXYZ *v2 = static_cast<const VertexSBAPointXYZ *>(_vertices[0]);
+    const VertexPointXYZ *v2 = static_cast<const VertexPointXYZ *>(_vertices[0]);
 
     Vector2 obs(_measurement);
     _error = obs - v1->cam_map2(project(v1->estimate().inverse().map(v2->estimate())));
