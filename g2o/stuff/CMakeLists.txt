@@ -4,7 +4,7 @@ add_library(stuff ${G2O_LIB_TYPE}
   command_args.cpp   misc.h           sparse_helper.cpp  timeutil.h
   command_args.h     os_specific.c    sparse_helper.h
   filesys_tools.cpp  os_specific.h    string_tools.cpp
-  property.cpp       property.h       
+  property.cpp       property.h       tuple_tools.h
   sampler.cpp        sampler.h        unscented.h
   tictoc.cpp tictoc.h
   g2o_stuff_api.h
@@ -14,7 +14,7 @@ set_target_properties(stuff PROPERTIES OUTPUT_NAME ${LIB_PREFIX}stuff)
 target_link_libraries(stuff PUBLIC ${G2O_EIGEN3_EIGEN_TARGET})
 
 if (APPLE)
-  set_target_properties(stuff PROPERTIES INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+  set_target_properties(stuff PROPERTIES INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 endif()
 
 install(TARGETS stuff
@@ -31,7 +31,7 @@ if(OPENGL_FOUND AND G2O_HAVE_OPENGL)
     opengl_primitives.cpp opengl_primitives.h
     )
   if (APPLE)
-  set_target_properties(opengl_helper PROPERTIES INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+  set_target_properties(opengl_helper PROPERTIES INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 endif()
   install(TARGETS opengl_helper
     EXPORT ${G2O_TARGETS_EXPORT_NAME}

@@ -4,6 +4,7 @@ set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 project(g2o)
 
 include(CPack)
+include(GNUInstallDirs)
 
 # The library prefix
 set(LIB_PREFIX g2o_)
@@ -53,8 +54,10 @@ endif(MSVC90)
 # avoid the problem of loading both the built and INSTALLed versions
 # of the shared targets
 if(APPLE)
-  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
   set(CMAKE_INSTALL_RPATH "")
+  set(CMAKE_MACOSX_RPATH TRUE)
+  # ignore deprecated GL
+  add_definitions(-DGL_SILENCE_DEPRECATION)
 endif(APPLE)
 
 # Set the output directory for the build executables and libraries
@@ -69,10 +72,10 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${g2o_LIBRARY_OUTPUT_DIRECTORY})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${g2o_RUNTIME_OUTPUT_DIRECTORY})
 
 # Set standard installation directories
-set(RUNTIME_DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
-set(LIBRARY_DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-set(ARCHIVE_DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-set(INCLUDES_DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+set(RUNTIME_DESTINATION ${CMAKE_INSTALL_BINDIR})
+set(LIBRARY_DESTINATION ${CMAKE_INSTALL_LIBDIR})
+set(ARCHIVE_DESTINATION ${CMAKE_INSTALL_LIBDIR})
+set(INCLUDES_DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 set(INCLUDES_INSTALL_DIR ${INCLUDES_DESTINATION}/g2o)
 
 # Set search directory for looking for our custom CMake scripts to
@@ -101,35 +104,28 @@ if(ANDROID)
   message(STATUS "Cross compiling for Android")
 endif()
 
-# For building the CHOLMOD / CSPARSE solvers
-option (G2O_USE_CHOLMOD "Build g2o with CHOLMOD support" ON)
-
+# For building the CHOLMOD based solvers
+option(G2O_USE_CHOLMOD "Build g2o with CHOLMOD support" ON)
 find_package(Cholmod)
 find_package(BLAS)
 find_package(LAPACK)
-
-if(G2O_USE_CHOLMOD AND CHOLMOD_FOUND AND BLAS_FOUND AND LAPACK_FOUND)
-  message(STATUS "Found CHOLMOD and its dependencies")
+if (G2O_USE_CHOLMOD AND CHOLMOD_FOUND AND BLAS_FOUND AND LAPACK_FOUND)
+  message(STATUS "Enable support for Cholmod")
   set(CHOLMOD_FOUND TRUE)
 else()
+  message(STATUS "Disable support for Cholmod")
   set(CHOLMOD_FOUND FALSE)
 endif()
 
-option (G2O_USE_CSPARSE "Build g2o with CSParse support" ON)
-
+# For building the CSparse based solvers
+option(G2O_USE_CSPARSE "Build g2o with CSParse support" ON)
 find_package(CSparse)
-if (G2O_USE_CSPARSE)
-  if(CSPARSE_FOUND)
-    set(BUILD_CSPARSE OFF CACHE BOOL "Build local CSparse library")
-  else(CSPARSE_FOUND)
-    set(BUILD_CSPARSE ON CACHE BOOL "Build local CSparse library")
-    if(BUILD_CSPARSE)
-      set(CSPARSE_FOUND TRUE)
-    endif()
-  endif(CSPARSE_FOUND)
-else(G2O_USE_CSPARSE)
-  set(BUILD_CSPARSE OFF "Build local CSparse library")
-endif(G2O_USE_CSPARSE)
+if (G2O_USE_CSPARSE AND CSPARSE_FOUND)
+  message(STATUS "Enable support for CSparse")
+else()
+  message(STATUS "Disable support for CSparse")
+  set(CSPARSE_FOUND FALSE)
+endif()
 
 option(BUILD_LGPL_SHARED_LIBS "Build LGPL Code as Shared Libraries (LGPL Code)" ON)
 set (G2O_LGPL_LIB_TYPE STATIC)
@@ -224,36 +220,51 @@ macro(DEFINE_SSE_VAR  _setname)
 endmacro(DEFINE_SSE_VAR)
 
 # SSE optimizations:
-IF (NOT CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
-  DEFINE_SSE_VAR(SSE2)
-  DEFINE_SSE_VAR(SSE3)
-  DEFINE_SSE_VAR(SSE4_1)
-  DEFINE_SSE_VAR(SSE4_2)
-  DEFINE_SSE_VAR(SSE4_A)
-ENDIF()
+DEFINE_SSE_VAR(SSE2)
+DEFINE_SSE_VAR(SSE3)
+DEFINE_SSE_VAR(SSE4_1)
+DEFINE_SSE_VAR(SSE4_2)
+DEFINE_SSE_VAR(SSE4_A)
+
+include(CheckCXXCompilerFlag)
+
+macro(CHECK_AND_ADD_COMPILE_OPTION _option)
+check_cxx_compiler_flag(${_option} OPTION_AVAILABLE)
+  IF(${OPTION_AVAILABLE})
+    add_compile_options(${_option})
+  ENDIF(${OPTION_AVAILABLE})
+endmacro(CHECK_AND_ADD_COMPILE_OPTION)
 
 # Add build flags for clang AND GCC
 if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang" OR CMAKE_COMPILER_IS_GNUCXX)
   # SSE2?
   if (CMAKE_G2O_HAS_SSE2)
-    add_compile_options(-msse2)
+    CHECK_AND_ADD_COMPILE_OPTION(-msse2)
   endif()
   # SSE3?
   if (CMAKE_G2O_HAS_SSE3)
-    add_compile_options(-msse3 -mssse3)
+    CHECK_AND_ADD_COMPILE_OPTION(-msse3 -mssse3)
   endif()
   # SSE4*?
   if (CMAKE_G2O_HAS_SSE4_1)
-    add_compile_options(-msse4.1)
+    CHECK_AND_ADD_COMPILE_OPTION(-msse4.1)
   endif()
   if (CMAKE_G2O_HAS_SSE4_2)
-    add_compile_options(-msse4.2)
+    CHECK_AND_ADD_COMPILE_OPTION(-msse4.2)
   endif()
   if (CMAKE_G2O_HAS_SSE4_A)
-    add_compile_options(-msse4a)
+    CHECK_AND_ADD_COMPILE_OPTION(-msse4a)
   endif()
 endif()
 # End of of SSE* autodetect code -------
+
+# code coverage
+option(BUILD_CODE_COVERAGE "Enable coverage reporting" OFF)
+if(BUILD_CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  message(STATUS "Enabling coverage compiler flags")
+  set(g2o_C_FLAGS "${g2o_C_FLAGS} --coverage")
+  set(g2o_CXX_FLAGS "${g2o_CXX_FLAGS} --coverage")
+endif()
 
 # Compiler specific options for gcc
 if(CMAKE_COMPILER_IS_GNUCXX)
@@ -318,8 +329,8 @@ if(MSVC)
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Ox /Oi")
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /Ox /Oi")
 
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
-  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Od")
+  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /Od")
 
   # SSE2 optimizations
   # No need to specify if building for x64 (actually, it generates an annoying warning)
@@ -354,8 +365,8 @@ if(MSVC)
 
 endif(MSVC)
 
-# C++11 support
-set(CMAKE_CXX_STANDARD 11)
+# C++14 support
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # specifying compiler flags
@@ -365,7 +376,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${g2o_C_FLAGS}")
 # Find Eigen3. If it defines the target, this is used. If not,
 # fall back to the using the module form.
 # See https://eigen.tuxfamily.org/dox/TopicCMakeGuide.html for details
-find_package(Eigen3 REQUIRED)
+find_package(Eigen3 3.3 REQUIRED)
 if (TARGET Eigen3::Eigen)
   set(G2O_EIGEN3_EIGEN_TARGET Eigen3::Eigen)
 else()
@@ -383,10 +394,6 @@ set(G2O_SHARED_LIBS ${BUILD_SHARED_LIBS})
 set(G2O_LGPL_SHARED_LIBS ${BUILD_LGPL_SHARED_LIBS})
 set(G2O_CXX_COMPILER "${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER}")
 
-configure_file(config.h.in "${PROJECT_BINARY_DIR}/g2o/config.h")
-install(FILES ${PROJECT_BINARY_DIR}/g2o/config.h DESTINATION ${INCLUDES_DESTINATION}/g2o)
-
-
 # Generate cmake configuration scripts
 set(G2O_GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 set(G2O_VERSION_CONFIG "${G2O_GENERATED_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
@@ -394,6 +401,7 @@ set(G2O_PROJECT_CONFIG "${G2O_GENERATED_DIR}/${PROJECT_NAME}Config.cmake")
 set(G2O_TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
 set(G2O_CONFIG_INSTALL_DIR "lib/cmake/${PROJECT_NAME}")
 set(G2O_NAMESPACE "${PROJECT_NAME}::")
+set(G2O_SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(G2O_VERSION 1.0.0)
 
 include(CMakePackageConfigHelpers)
@@ -401,8 +409,11 @@ WRITE_BASIC_PACKAGE_VERSION_FILE(
     "${G2O_VERSION_CONFIG}" VERSION ${G2O_VERSION} COMPATIBILITY SameMajorVersion
 )
 
-configure_file("${g2o_SOURCE_DIR}/cmake_modules/Config.cmake.in" "${G2O_PROJECT_CONFIG}" @ONLY)
+configure_file(config.h.in "${PROJECT_BINARY_DIR}/g2o/config.h")
+install(FILES ${PROJECT_BINARY_DIR}/g2o/config.h DESTINATION ${INCLUDES_DESTINATION}/g2o)
 
+configure_file("${g2o_SOURCE_DIR}/cmake_modules/Config.cmake.in" "${G2O_PROJECT_CONFIG}" @ONLY)
+configure_file("${g2o_SOURCE_DIR}/script/codecov.sh.in" "${CMAKE_CURRENT_BINARY_DIR}/codecov.sh" @ONLY)
 
 install(
     FILES "${G2O_PROJECT_CONFIG}" "${G2O_VERSION_CONFIG}"
@@ -420,9 +431,16 @@ if(BUILD_UNITTESTS)
   add_subdirectory(unit_test)
 endif()
 
-# Include the subdirectories
-add_subdirectory(EXTERNAL)
-add_subdirectory(g2o)
+# Benchmarks
+option(G2O_BUILD_BENCHMARKS "build benchmarks" OFF)
+if(G2O_BUILD_BENCHMARKS)
+  find_package(benchmark)
+  if(${benchmark_FOUND})
+    add_subdirectory(benchmarks)
+  else()
+    message(WARNING G2O_BUILD_BENCHMARKS was set to true, but the benchmark library cannot be found)
+  endif()
+endif()
 
-# Install colcon package.xml
-install(FILES package.xml DESTINATION share/libg2o)
+# Include the subdirectories
+add_subdirectory(g2o)
