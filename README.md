@@ -1,8 +1,9 @@
 # g2o - General Graph Optimization
 
-Linux: [![CI](https://github.com/RainerKuemmerle/g2o/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/RainerKuemmerle/g2o/actions/workflows/ci.yml)
-Windows: [![Build status](https://ci.appveyor.com/api/projects/status/9w0cpb9krc6t4nt7/branch/master?svg=true)](https://ci.appveyor.com/project/RainerKuemmerle/g2o/branch/master)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/e87df92948b747d58591372dd425fc59)](https://app.codacy.com/manual/rainer.kuemmerle/g2o?utm_source=github.com&utm_medium=referral&utm_content=RainerKuemmerle/g2o&utm_campaign=Badge_Grade_Dashboard)
+Linux/Mac: [![CI](https://github.com/RainerKuemmerle/g2o/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/RainerKuemmerle/g2o/actions/workflows/ci.yml)
+Windows: [![win64](https://github.com/RainerKuemmerle/g2o/actions/workflows/windows.yml/badge.svg?event=push)](https://github.com/RainerKuemmerle/g2o/actions/workflows/windows.yml)
+Windows (AppVeyor): [![Build status](https://ci.appveyor.com/api/projects/status/9w0cpb9krc6t4nt7/branch/master?svg=true)](https://ci.appveyor.com/project/RainerKuemmerle/g2o/branch/master)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/280c5eed95ed4059ad5d003d59e72704)](https://www.codacy.com/gh/RainerKuemmerle/g2o/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RainerKuemmerle/g2o&amp;utm_campaign=Badge_Grade)
 
 g2o is an open-source C++ framework for optimizing graph-based nonlinear error
 functions. g2o has been designed to be easily extensible to a wide range of
@@ -22,6 +23,10 @@ specified in a few lines of code. The current implementation provides solutions
 to several variants of SLAM and BA. g2o offers a performance comparable to
 implementations of state-of-the-art approaches for the specific problems
 (02/2011).
+
+## Python and updated memory management
+The branch [pymem](https://github.com/RainerKuemmerle/g2o/tree/pymem) contains a python wrapper and switches to smart pointer instead of RAW pointers.
+It is currently experimental but PRs and improvements are welcome - as always.
 
 ## Papers Describing the Approach
 
