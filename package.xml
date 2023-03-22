@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>libg2o</name>
+  <version>2020.5.29</version>
+  <description>
+    The libg2o library from http://openslam.org/g2o.html
+  </description>
+
+  <author>Rainer Kuemmerle</author>
+  <author>Giorgio Grisetti</author>
+  <author>Hauke Strasdat</author>
+  <author>Kurt Konolige</author>
+  <author>Wolfram Burgard</author>
+
+  <maintainer email="christoph.roesmann@tu-dortmund.de">Christoph Rösmann</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">https://github.com/RainerKuemmerle/g2o</url>
+  
+  <buildtool_depend>ament_cmake</buildtool_depend>
+    
+  <build_depend>eigen</build_depend>
+  <build_depend>opengl</build_depend>
+  <build_depend>suitesparse</build_depend>
+  
+  <exec_depend>eigen</exec_depend>
+  <exec_depend>opengl</exec_depend>
+  <exec_depend>suitesparse</exec_depend>
+  
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
