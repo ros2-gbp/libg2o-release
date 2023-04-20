@@ -1,7 +1,4 @@
 add_library(g2o_ceres_ad INTERFACE)
-set_target_properties(g2o_ceres_ad PROPERTIES
-    CXX_STANDARD 17
-)
 
 install(TARGETS g2o_ceres_ad
   EXPORT ${G2O_TARGETS_EXPORT_NAME}
@@ -12,5 +9,5 @@ install(TARGETS g2o_ceres_ad
 )
 
 file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
-install(FILES ${headers} DESTINATION ${INCLUDES_INSTALL_DIR}/EXTERNAL/ceres)
-install(FILES LICENSE DESTINATION ${INCLUDES_INSTALL_DIR}/EXTERNAL/ceres)
+install(FILES ${headers} DESTINATION ${INCLUDES_INSTALL_DIR}/autodiff)
+install(FILES LICENSE DESTINATION ${INCLUDES_INSTALL_DIR}/autodiff)

@@ -26,6 +26,8 @@
 
 #include "edge_se2_twopointsxy.h"
 
+#include <cassert>
+
 #ifdef G2O_HAVE_OPENGL
 #include "g2o/stuff/opengl_primitives.h"
 #include "g2o/stuff/opengl_wrapper.h"
@@ -113,9 +115,9 @@ void EdgeSE2TwoPointsXY::initialEstimate(
   }
 }
 
-number_t EdgeSE2TwoPointsXY::initialEstimatePossible(
-    const OptimizableGraph::VertexSet &fixed,
-    OptimizableGraph::Vertex *toEstimate) {
+double EdgeSE2TwoPointsXY::initialEstimatePossible(
+    const OptimizableGraph::VertexSet& fixed,
+    OptimizableGraph::Vertex* toEstimate) {
   (void)toEstimate;
 
   for (std::set<HyperGraph::Vertex *>::iterator it = fixed.begin();

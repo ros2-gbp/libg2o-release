@@ -67,7 +67,12 @@ class G2O_CORE_API JacobianWorkspace {
    * update the maximum required workspace needed by taking into account this
    * edge
    */
-  void updateSize(const HyperGraph::Edge* e, bool reset = false);
+  void updateSize(const HyperGraph::Edge* e, bool reset);
+  /**
+   * update the maximum required workspace needed by taking into account this
+   * edge
+   */
+  void updateSize(const HyperGraph::Edge* e);
 
   /**
    * update the required workspace by looking at a full graph
@@ -87,7 +92,7 @@ class G2O_CORE_API JacobianWorkspace {
   /**
    * return the workspace for a vertex in an edge
    */
-  number_t* workspaceForVertex(int vertexIndex) {
+  double* workspaceForVertex(int vertexIndex) {
     assert(vertexIndex >= 0 && (size_t)vertexIndex < _workspace.size() &&
            "Index out of bounds");
     return _workspace[vertexIndex].data();
