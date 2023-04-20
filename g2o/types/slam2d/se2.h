@@ -29,6 +29,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <cassert>
 
 #include "g2o/core/eigen_types.h"
 #include "g2o/stuff/misc.h"
@@ -50,7 +51,7 @@ class G2O_TYPES_SLAM2D_API SE2 {
 
   SE2(const Vector3& v) : _R(v[2]), _t(v[0], v[1]) {}
 
-  SE2(number_t x, number_t y, number_t theta) : _R(theta), _t(x, y) {}
+  SE2(double x, double y, double theta) : _R(theta), _t(x, y) {}
 
   //! translational component
   inline const Vector2& translation() const { return _t; }
@@ -91,7 +92,7 @@ class G2O_TYPES_SLAM2D_API SE2 {
     return ret;
   }
 
-  inline number_t operator[](int i) const {
+  inline double operator[](int i) const {
     assert(i >= 0 && i < 3);
     if (i < 2) return _t(i);
     return _R.angle();

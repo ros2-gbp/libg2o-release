@@ -26,6 +26,7 @@
 
 #include "optimization_algorithm_gauss_newton.h"
 
+#include <cassert>
 #include <iostream>
 
 #include "batch_stats.h"
@@ -53,7 +54,7 @@ OptimizationAlgorithm::SolverResult OptimizationAlgorithmGaussNewton::solve(
 
   // here so that correct component for max-mixtures can be computed before the
   // build structure
-  number_t t = get_monotonic_time();
+  double t = get_monotonic_time();
   _optimizer->computeActiveErrors();
   G2OBatchStatistics* globalStats = G2OBatchStatistics::globalStats();
   if (globalStats) {

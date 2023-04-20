@@ -26,6 +26,8 @@
 
 #include "edge_se2_prior.h"
 
+#include <cassert>
+
 namespace g2o {
 
 EdgeSE2Prior::EdgeSE2Prior() : BaseUnaryEdge<3, SE2, VertexSE2>() {}
@@ -58,7 +60,7 @@ void EdgeSE2Prior::setMeasurement(const SE2& m) {
   _inverseMeasurement = m.inverse();
 }
 
-bool EdgeSE2Prior::setMeasurementData(const number_t* d) {
+bool EdgeSE2Prior::setMeasurementData(const double* d) {
   _measurement = SE2(d[0], d[1], d[2]);
   _inverseMeasurement = _measurement.inverse();
   return true;

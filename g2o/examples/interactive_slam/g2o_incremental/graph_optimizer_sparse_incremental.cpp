@@ -16,6 +16,8 @@
 
 #include "graph_optimizer_sparse_incremental.h"
 
+#include <cassert>
+
 #include "g2o/core/block_solver.h"
 #include "g2o/core/optimization_algorithm_gauss_newton.h"
 #include "g2o/examples/interactive_slam/g2o_interactive/types_slam2d_online.h"
@@ -283,7 +285,9 @@ bool SparseOptimizerIncremental::updateInitialization(
       lastBlock = m;
     }
   }
-  lastBlock->diagonal().array() += 1e-6;  // HACK to get Eigen value > 0
+  if (lastBlock) {
+    lastBlock->diagonal().array() += 1e-6;  // HACK to get Eigen value > 0
+  }
 
   for (HyperGraph::EdgeSet::const_iterator it = eset.begin(); it != eset.end();
        ++it) {

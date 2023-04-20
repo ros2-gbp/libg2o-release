@@ -38,9 +38,11 @@ namespace g2o {
 
 static bool writeTripletEntries(const std::string& filename, int rows, int cols,
                                 const std::vector<TripletEntry>& triplets) {
-  string name = filename;
-  std::string::size_type lastDot = name.find_last_of('.');
-  if (lastDot != std::string::npos) name = name.substr(0, lastDot);
+  const string name = [&filename]() {
+    const std::string::size_type lastDot = filename.find_last_of('.');
+    if (lastDot != std::string::npos) return filename.substr(0, lastDot);
+    return filename;
+  }();
 
   std::ofstream fout(filename.c_str());
   fout << "# name: " << name << std::endl;
@@ -56,7 +58,7 @@ static bool writeTripletEntries(const std::string& filename, int rows, int cols,
   return fout.good();
 }
 
-bool writeVector(const string& filename, const number_t* v, int n) {
+bool writeVector(const string& filename, const double* v, int n) {
   ofstream os(filename.c_str());
   os << fixed;
   for (int i = 0; i < n; i++) os << *v++ << endl;
