@@ -36,7 +36,7 @@ class VertexFlatSE2 : public g2o::BaseVertex<3, g2o::Vector3> {
  public:
   virtual void setToOriginImpl() { _estimate.setZero(); }
 
-  virtual void oplusImpl(const number_t* update) {
+  virtual void oplusImpl(const double* update) {
     _estimate += Eigen::Map<const g2o::Vector3>(update);
     _estimate(2) = g2o::normalize_theta(_estimate(2));
   }
@@ -82,8 +82,8 @@ class Edge3ADTester
   G2O_MAKE_AUTO_AD_FUNCTIONS
 
   // NOOPs
-  virtual bool read(std::istream&) { return false; };
-  virtual bool write(std::ostream&) const { return false; };
+  bool read(std::istream&) override { return false; };
+  bool write(std::ostream&) const override { return false; };
 };
 
 /**
