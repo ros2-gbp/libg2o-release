@@ -32,13 +32,8 @@
 #include <limits>
 #include <utility>
 
-#ifdef G2O_USE_VENDORED_CERES
-#include "g2o/EXTERNAL/ceres/fixed_array.h"
-#else
-#include <ceres/internal/fixed_array.h>
-#endif
-
 #include "base_edge.h"
+#include "g2o/autodiff/fixed_array.h"
 #include "g2o/config.h"
 #include "g2o/stuff/misc.h"
 #include "g2o/stuff/tuple_tools.h"
@@ -173,15 +168,15 @@ class BaseFixedSizedEdge : public BaseEdge<D, E> {
 
   template <int EdgeDimension, int VertexDimension>
   using JacobianType = typename Eigen::Matrix<
-      number_t, EdgeDimension, VertexDimension,
+      double, EdgeDimension, VertexDimension,
       EdgeDimension == 1 ? Eigen::RowMajor : Eigen::ColMajor>::AlignedMapType;
 
   //! it requires quite some ugly code to get the type of hessians...
   template <int DN, int DM>
   using HessianBlockType = Eigen::Map<
-      Eigen::Matrix<number_t, DN, DM,
+      Eigen::Matrix<double, DN, DM,
                     DN == 1 ? Eigen::RowMajor : Eigen::ColMajor>,
-      Eigen::Matrix<number_t, DN, DM,
+      Eigen::Matrix<double, DN, DM,
                     DN == 1 ? Eigen::RowMajor : Eigen::ColMajor>::Flags &
               Eigen::PacketAccessBit
           ? Eigen::Aligned
@@ -291,7 +286,7 @@ class BaseFixedSizedEdge : public BaseEdge<D, E> {
   template <int N, int M, typename AtOType>
   void constructOffDiagonalQuadraticFormM(const AtOType& AtO);
 
-  virtual void mapHessianMemory(number_t* d, int i, int j, bool rowMajor);
+  virtual void mapHessianMemory(double* d, int i, int j, bool rowMajor);
 
   using BaseEdge<D, E>::resize;
   using BaseEdge<D, E>::computeError;
