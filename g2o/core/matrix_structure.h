@@ -27,6 +27,8 @@
 #ifndef G2O_MATRIX_STRUCTURE_H
 #define G2O_MATRIX_STRUCTURE_H
 
+#include <string_view>
+
 #include "g2o_core_api.h"
 
 namespace g2o {
@@ -42,7 +44,7 @@ class G2O_CORE_API MatrixStructure {
   /**
    * allocate space for the Matrix Structure. You may call this on an already
    * allocated struct, it will then reallocate the memory + additional space
-   * (number_t the required space).
+   * (double the required space).
    */
   void alloc(int n_, int nz);
 
@@ -52,7 +54,7 @@ class G2O_CORE_API MatrixStructure {
    * Write the matrix pattern to a file. File is also loadable by octave, e.g.,
    * then use spy(matrix)
    */
-  bool write(const char* filename) const;
+  bool write(std::string_view filename) const;
 
   int n;     ///< A is m-by-n.  n must be >= 0.
   int m;     ///< A is m-by-n.  m must be >= 0.
