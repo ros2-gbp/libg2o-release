@@ -169,10 +169,6 @@ endif()
 # For building the GUI
 find_package(QGLViewer)
 
-# The Ceres package is required for some of the solvers.
-# Ceres is vendored in g2o/EXTERNAL/ceres, or the system's can be used.
-option(G2O_USE_VENDORED_CERES "Use vendored Ceres from g2o/EXTERNAL/ceres" ON)
-
 # Handle building the built in types. There is a fair degree of
 # granularity and dependency in the types supported.
 
@@ -443,7 +439,7 @@ if(MSVC)
   add_definitions(-D_CRT_SECURE_NO_WARNINGS=1)  # Avoid deprecated fprintf(), etc.
   add_definitions("/nologo")
   # TODO not sure this should be a thing
-  add_definitions("/wd4244") # Conversion from number_t -> int
+  add_definitions("/wd4244") # Conversion from double -> int
   add_definitions("/wd4267") # Conversion during return
   add_definitions("/wd4522") # Duplicated operator=() in Eigen headers
 

@@ -139,15 +139,7 @@ class G2O_CORE_API SparseOptimizer : public OptimizableGraph {
    * @returns false if the operation is not supported by the solver
    */
   bool computeMarginals(SparseBlockMatrix<MatrixX>& spinv,
-                        const Vertex* vertex) {
-    if (vertex->hessianIndex() < 0) {
-      return false;
-    }
-    std::vector<std::pair<int, int> > index;
-    index.push_back(
-        std::pair<int, int>(vertex->hessianIndex(), vertex->hessianIndex()));
-    return computeMarginals(spinv, index);
-  }
+                        const Vertex* vertex);
 
   /**
    * computes the inverse of the set specified vertices, assembled into a single
@@ -157,15 +149,7 @@ class G2O_CORE_API SparseOptimizer : public OptimizableGraph {
    * @returns false if the operation is not supported by the solver
    */
   bool computeMarginals(SparseBlockMatrix<MatrixX>& spinv,
-                        const VertexContainer& vertices) {
-    std::vector<std::pair<int, int> > indices;
-    for (VertexContainer::const_iterator it = vertices.begin();
-         it != vertices.end(); ++it) {
-      indices.push_back(
-          std::pair<int, int>((*it)->hessianIndex(), (*it)->hessianIndex()));
-    }
-    return computeMarginals(spinv, indices);
-  }
+                        const VertexContainer& vertices);
 
   //! finds a gauge in the graph to remove the undefined dof.
   // The gauge should be fixed() and then the optimization can work (if no
@@ -176,13 +160,13 @@ class G2O_CORE_API SparseOptimizer : public OptimizableGraph {
   bool gaugeFreedom();
 
   /**returns the cached chi2 of the active portion of the graph*/
-  number_t activeChi2() const;
+  double activeChi2() const;
   /**
    * returns the cached chi2 of the active portion of the graph.
    * In contrast to activeChi2() this functions considers the weighting
    * of the error according to the robustification of the error functions.
    */
-  number_t activeRobustChi2() const;
+  double activeRobustChi2() const;
 
   //! verbose information during optimization
   bool verbose() const { return _verbose; }
@@ -273,10 +257,10 @@ class G2O_CORE_API SparseOptimizer : public OptimizableGraph {
 
   /**
    * update the estimate of the active vertices
-   * @param update: the number_t vector containing the stacked
+   * @param update: the double vector containing the stacked
    * elements of the increments on the vertices.
    */
-  void update(const number_t* update);
+  void update(const double* update);
 
   /**
      returns the set of batch statistics about the optimisation

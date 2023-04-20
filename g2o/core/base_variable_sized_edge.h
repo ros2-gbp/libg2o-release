@@ -32,15 +32,10 @@
 #include <limits>
 
 #include "base_edge.h"
+#include "g2o/autodiff/fixed_array.h"
 #include "g2o/config.h"
 #include "g2o/stuff/misc.h"
 #include "robust_kernel.h"
-
-#ifdef G2O_USE_VENDORED_CERES
-#include "g2o/EXTERNAL/ceres/fixed_array.h"
-#else
-#include <ceres/internal/fixed_array.h>
-#endif
 
 namespace g2o {
 
@@ -90,7 +85,7 @@ class BaseVariableSizedEdge : public BaseEdge<D, E> {
 
   virtual void constructQuadraticForm();
 
-  virtual void mapHessianMemory(number_t* d, int i, int j, bool rowMajor);
+  virtual void mapHessianMemory(double* d, int i, int j, bool rowMajor);
 
   using BaseEdge<D, E>::computeError;
 

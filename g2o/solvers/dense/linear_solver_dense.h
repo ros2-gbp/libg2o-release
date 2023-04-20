@@ -32,6 +32,7 @@
 #include <Eigen/Core>
 #include <utility>
 #include <vector>
+#include <cassert>
 
 #include "g2o/core/batch_stats.h"
 #include "g2o/core/linear_solver.h"
@@ -53,7 +54,7 @@ class LinearSolverDense : public LinearSolver<MatrixType> {
     return true;
   }
 
-  bool solve(const SparseBlockMatrix<MatrixType>& A, number_t* x, number_t* b) {
+  bool solve(const SparseBlockMatrix<MatrixType>& A, double* x, double* b) {
     int n = A.cols();
     int m = A.cols();
 
