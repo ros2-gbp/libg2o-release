@@ -152,8 +152,7 @@ tracks:
     patches: foxy
     release_inc: '6'
     release_repo_url: null
-    release_tag: master
-    release_tag_saved: :{ask}
+    release_tag: :{ask}
     ros_distro: jazzy
     vcs_type: git
     vcs_uri: https://github.com/RainerKuemmerle/g2o.git
