@@ -150,7 +150,7 @@ tracks:
     last_version: 2020.5.29
     name: upstream
     patches: foxy
-    release_inc: '5'
+    release_inc: '6'
     release_repo_url: null
     release_tag: master
     release_tag_saved: :{ask}
