@@ -157,8 +157,7 @@ tracks:
     ros_distro: jazzy
     vcs_type: git
     vcs_uri: https://github.com/RainerKuemmerle/g2o.git
-    version: 2020.5.29
-    version_saved: :{ask}
+    version: :{ask}
   rolling:
     actions:
     - bloom-export-upstream :{vcs_local_uri} :{vcs_type} --tag :{release_tag} --display-uri
