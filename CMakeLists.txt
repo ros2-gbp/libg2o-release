@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
+
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment target")
 
 project(g2o)
 
@@ -12,8 +14,8 @@ set(LIB_PREFIX g2o_)
 set(g2o_C_FLAGS)
 set(g2o_CXX_FLAGS)
 
-set(G2O_LIB_VERSION   "0.1.0" CACHE STRING "g2o library version")
-set(G2O_LIB_SOVERSION "0.1"   CACHE STRING "g2o library soversion")
+set(G2O_LIB_VERSION   "0.2.0" CACHE STRING "g2o library version")
+set(G2O_LIB_SOVERSION "0.2"   CACHE STRING "g2o library soversion")
 set(G2O_VERSION 1.0.0)
 
 # manually check for top-level project if CMake is older than 3.21
@@ -63,7 +65,7 @@ set(RUNTIME_DESTINATION ${CMAKE_INSTALL_BINDIR})
 set(LIBRARY_DESTINATION ${CMAKE_INSTALL_LIBDIR})
 set(ARCHIVE_DESTINATION ${CMAKE_INSTALL_LIBDIR})
 set(INCLUDES_DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-set(INCLUDES_INSTALL_DIR ${INCLUDES_DESTINATION}/g2o)
+set(INCLUDES_INSTALL_DIR ${INCLUDES_DESTINATION}/${PROJECT_NAME})
 
 # Set search directory for looking for our custom CMake scripts to
 # look for SuiteSparse, QGLViewer, and Eigen3.
@@ -155,6 +157,7 @@ find_package(OpenGL)
 
 # If OpenGL was found, use the import target if available. If not, use old-style includes
 option(G2O_USE_OPENGL "Build g2o with OpenGL support for visualization" ON)
+set(G2O_HAVE_OPENGL 0)
 if (OPENGL_FOUND AND G2O_USE_OPENGL)
   if (TARGET OpenGL::GL)
     set(G2O_OPENGL_TARGET "OpenGL::GL;OpenGL::GLU")
@@ -162,7 +165,7 @@ if (OPENGL_FOUND AND G2O_USE_OPENGL)
     set(G2O_OPENGL_TARGET "${OPENGL_LIBRARIES}")
     include_directories(${OPENGL_INCLUDE_DIR})
   endif()
-  set (G2O_HAVE_OPENGL 1)
+  set(G2O_HAVE_OPENGL 1)
   message(STATUS "Compiling with OpenGL support")
   #message(WARNING G2O_OPENGL_TARGET=${G2O_OPENGL_TARGET})
 endif()
@@ -172,10 +175,11 @@ find_package(QGLViewer)
 
 # Logging library
 option(G2O_USE_LOGGING "Try to use spdlog for logging" ON)
+set(G2O_HAVE_LOGGING 0)
 if (G2O_USE_LOGGING)
   find_package(spdlog 1.6 QUIET)
   if (TARGET spdlog::spdlog OR TARGET spdlog::spdlog_header_only)
-    set (G2O_HAVE_LOGGING 1)
+    set(G2O_HAVE_LOGGING 1)
     message(STATUS "Compiling with logging support")
   endif()
 endif()
@@ -508,7 +512,6 @@ configure_file(config.h.in "${PROJECT_BINARY_DIR}/g2o/config.h")
 install(FILES ${PROJECT_BINARY_DIR}/g2o/config.h DESTINATION ${INCLUDES_DESTINATION}/g2o)
 
 configure_file("${g2o_SOURCE_DIR}/cmake_modules/Config.cmake.in" "${G2O_PROJECT_CONFIG}" @ONLY)
-configure_file("${g2o_SOURCE_DIR}/script/codecov.sh.in" "${CMAKE_CURRENT_BINARY_DIR}/codecov.sh" @ONLY)
 
 install(
     FILES "${G2O_PROJECT_CONFIG}" "${G2O_VERSION_CONFIG}"
