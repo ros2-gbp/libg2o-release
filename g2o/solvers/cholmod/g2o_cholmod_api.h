@@ -24,31 +24,26 @@
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef G2O_BASE_BINARY_EDGE_H
-#define G2O_BASE_BINARY_EDGE_H
+#ifndef G2O_SOLVER_CHOLMOD_API_H
+#define G2O_SOLVER_CHOLMOD_API_H
 
-#include "base_fixed_sized_edge.h"
+#include "g2o/config.h"
 
-namespace g2o {
-
-// This could be a simple using statement, but in multiple places
-// _jacobianOplusXi and _jacobianOplusYi are used.
-template <int D, typename E, typename VertexXi, typename VertexXj>
-class BaseBinaryEdge : public BaseFixedSizedEdge<D, E, VertexXi, VertexXj> {
- public:
-  using VertexXiType = VertexXi;
-  using VertexXjType = VertexXj;
-  BaseBinaryEdge() : BaseFixedSizedEdge<D, E, VertexXi, VertexXj>() {};
-
- protected:
-  typename BaseFixedSizedEdge<D, E, VertexXi, VertexXj>::template JacobianType<
-      D, VertexXi::Dimension>& _jacobianOplusXi =
-      std::get<0>(this->_jacobianOplus);
-  typename BaseFixedSizedEdge<D, E, VertexXi, VertexXj>::template JacobianType<
-      D, VertexXj::Dimension>& _jacobianOplusXj =
-      std::get<1>(this->_jacobianOplus);
-};
-
-}  // namespace g2o
-
+#ifdef _MSC_VER
+// We are using a Microsoft compiler:
+#ifdef G2O_SHARED_LIBS
+#ifdef solver_cholmod_EXPORTS
+#define G2O_SOLVER_CHOLMOD_API __declspec(dllexport)
+#else
+#define G2O_SOLVER_CHOLMOD_API __declspec(dllimport)
 #endif
+#else
+#define G2O_SOLVER_CHOLMOD_API
+#endif
+
+#else
+// Not Microsoft compiler so set empty definition:
+#define G2O_SOLVER_CHOLMOD_API
+#endif
+
+#endif  // G2O_CSPARSE_API_H
