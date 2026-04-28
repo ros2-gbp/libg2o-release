@@ -32,7 +32,7 @@ jobs:
 
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
             fetch-depth: 25
 
@@ -57,7 +57,7 @@ jobs:
 
       - name: Install dependencies on macOS
         if: runner.os == 'macOS'
-        run: brew install cmake eigen coreutils
+        run: brew install eigen coreutils
 
       - name: Configure ccache for macOS
         if: runner.os == 'macOS'
@@ -88,6 +88,6 @@ jobs:
 
       - name: Coverage
         if: matrix.config.do_coverage == 'ON'
-        uses: codecov/codecov-action@v4.2.0
+        uses: codecov/codecov-action@v5.5.2
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

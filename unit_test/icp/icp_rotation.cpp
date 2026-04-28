@@ -1,5 +1,5 @@
 // g2o - General Graph Optimization
-// Copyright (C) 2011 R. Kuemmerle, G. Grisetti, W. Burgard
+// Copyright (C) 2014 R. Kuemmerle, G. Grisetti, W. Burgard
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -24,53 +24,46 @@
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef G2O_CREATORS_H
-#define G2O_CREATORS_H
+#include "g2o/types/icp/types_icp.h"
+#include "gtest/gtest.h"
 
-#include <string>
-#include <typeinfo>
+using namespace g2o;
 
-#include "hyper_graph.h"
+void checkRotationMatrix(const Matrix3& R) {
+  constexpr double tol = 1e-14;
+  // check norms of basis vectors
+  EXPECT_NEAR(R.row(0).norm(), 1, tol);
+  EXPECT_NEAR(R.row(1).norm(), 1, tol);
+  EXPECT_NEAR(R.row(2).norm(), 1, tol);
+  // check orthogonality
+  EXPECT_NEAR(R.row(0).dot(R.row(1)), 0, tol);
+  EXPECT_NEAR(R.row(1).dot(R.row(2)), 0, tol);
+  EXPECT_NEAR(R.row(2).dot(R.row(0)), 0, tol);
+  // check that basis is left-handed
+  EXPECT_NEAR(R.determinant(), -1.0, tol);
+}
 
-namespace g2o {
-
-/**
- * \brief Abstract interface for allocating HyperGraphElement
+/*
+ * ROTATION MATRIX Tests
  */
-class G2O_CORE_API AbstractHyperGraphElementCreator {
- public:
-  /**
-   * create a hyper graph element. Has to implemented in derived class.
-   */
-  virtual HyperGraph::HyperGraphElement* construct() = 0;
-  /**
-   * name of the class to be created. Has to implemented in derived class.
-   */
-  virtual const std::string& name() const = 0;
+TEST(IcpRotation, RotationMatrix) {
+  constexpr size_t thetaPoints = 100;
+  constexpr size_t phiPoints = 100;
+  EdgeGICP edge;
+  for (size_t n = 0; n < thetaPoints; n++) {
+    const double theta = M_PI * n / thetaPoints;
+    for (size_t k = 0; k < phiPoints; k++) {
+      const double phi = 2.0L * M_PI * k / phiPoints;
+      const Vector3 normal(std::sin(theta) * std::cos(phi), std::cos(theta),
+                           std::sin(theta) * std::sin(phi));
+      edge.normal0 = normal;
+      edge.normal1 = normal;
 
-  virtual ~AbstractHyperGraphElementCreator() {}
-};
+      edge.makeRot0();
+      edge.makeRot1();
 
-/**
- * \brief templatized creator class which creates graph elements
- */
-template <typename T>
-class HyperGraphElementCreator : public AbstractHyperGraphElementCreator {
- public:
-  HyperGraphElementCreator() : _name(typeid(T).name()) {}
-#if defined(WINDOWS) && \
-    defined(__GNUC__)  // force stack alignment on Windows with GCC
-  __attribute__((force_align_arg_pointer))
-#endif
-  HyperGraph::HyperGraphElement* construct() {
-    return new T;
+      checkRotationMatrix(edge.R0);
+      checkRotationMatrix(edge.R1);
+    }
   }
-  virtual const std::string& name() const { return _name; }
-
- protected:
-  std::string _name;
-};
-
-}  // namespace g2o
-
-#endif
+}

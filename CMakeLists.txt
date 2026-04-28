@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment target")
 
-project(g2o)
+project(g2o LANGUAGES CXX C)
 
 include(CPack)
 include(GNUInstallDirs)
@@ -39,26 +39,35 @@ if (BUILD_SHARED_LIBS)
   set (G2O_LIB_TYPE SHARED)
 endif()
 
-# On the Mac platform, configure the RPATH as per the INSTALL, to
-# avoid the problem of loading both the built and INSTALLed versions
-# of the shared targets
-if(APPLE)
-  set(CMAKE_INSTALL_RPATH "")
-  set(CMAKE_MACOSX_RPATH TRUE)
-  # ignore deprecated GL
-  add_definitions(-DGL_SILENCE_DEPRECATION)
-endif(APPLE)
+# Option to control installation of cmake config files when used as subdirectory
+option(G2O_INSTALL_CMAKE_CONFIG "Install CMake configuration files even when used as subdirectory" OFF)
 
-# Set the output directory for the build executables and libraries
-set(g2o_RUNTIME_OUTPUT_DIRECTORY ${g2o_BINARY_DIR}/bin CACHE PATH "Target for the binaries")
-if(WIN32)
-  set(g2o_LIBRARY_OUTPUT_DIRECTORY ${g2o_BINARY_DIR}/bin CACHE PATH "Target for the libraries")
-else(WIN32)
-  set(g2o_LIBRARY_OUTPUT_DIRECTORY ${g2o_BINARY_DIR}/lib CACHE PATH "Target for the libraries")
-endif(WIN32)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${g2o_LIBRARY_OUTPUT_DIRECTORY})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${g2o_LIBRARY_OUTPUT_DIRECTORY})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${g2o_RUNTIME_OUTPUT_DIRECTORY})
+# Only set output directories and options when this is the top-level project
+if(PROJECT_IS_TOP_LEVEL)
+  # On the Mac platform, configure the RPATH as per the INSTALL, to
+  # avoid the problem of loading both the built and INSTALLed versions
+  # of the shared targets
+  if(APPLE)
+    set(CMAKE_INSTALL_RPATH "")
+    set(CMAKE_MACOSX_RPATH TRUE)
+    # ignore deprecated GL
+    add_definitions(-DGL_SILENCE_DEPRECATION)
+  endif(APPLE)
+endif()
+
+# Only set output directories when this is the top-level project
+if(PROJECT_IS_TOP_LEVEL)
+  # Set the output directory for the build executables and libraries
+  set(g2o_RUNTIME_OUTPUT_DIRECTORY ${g2o_BINARY_DIR}/bin CACHE PATH "Target for the binaries")
+  if(WIN32)
+    set(g2o_LIBRARY_OUTPUT_DIRECTORY ${g2o_BINARY_DIR}/bin CACHE PATH "Target for the libraries")
+  else(WIN32)
+    set(g2o_LIBRARY_OUTPUT_DIRECTORY ${g2o_BINARY_DIR}/lib CACHE PATH "Target for the libraries")
+  endif(WIN32)
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${g2o_LIBRARY_OUTPUT_DIRECTORY})
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${g2o_LIBRARY_OUTPUT_DIRECTORY})
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${g2o_RUNTIME_OUTPUT_DIRECTORY})
+endif()
 
 # Set standard installation directories
 set(RUNTIME_DESTINATION ${CMAKE_INSTALL_BINDIR})
@@ -95,8 +104,8 @@ endif()
 
 # For building the CHOLMOD based solvers
 option(G2O_USE_CHOLMOD "Build g2o with CHOLMOD support" ON)
-find_package(SuiteSparse)
-if (G2O_USE_CHOLMOD AND SuiteSparse_CHOLMOD_FOUND)
+find_package(CHOLMOD)
+if (G2O_USE_CHOLMOD AND TARGET SuiteSparse::CHOLMOD)
   message(STATUS "Enable support for Cholmod")
   set(CHOLMOD_FOUND TRUE)
 else()
@@ -262,7 +271,14 @@ else()
 endif()
 
 # shall we build the core apps using the library
-option(G2O_BUILD_APPS "Build g2o apps" ON)
+if(PROJECT_IS_TOP_LEVEL)
+  option(G2O_BUILD_APPS "Build g2o apps" ON)
+  option(G2O_BUILD_EXAMPLES "Build g2o examples" ON)
+else()
+  option(G2O_BUILD_APPS "Build g2o apps" OFF)
+  option(G2O_BUILD_EXAMPLES "Build g2o examples" OFF)
+endif()
+
 if(G2O_BUILD_APPS)
   message(STATUS "Compiling g2o apps")
 endif(G2O_BUILD_APPS)
@@ -272,7 +288,6 @@ CMAKE_DEPENDENT_OPTION(G2O_BUILD_LINKED_APPS "Build apps linked with the librari
   "G2O_BUILD_APPS" OFF)
 
 # shall we build the examples
-option(G2O_BUILD_EXAMPLES "Build g2o examples" ON)
 if(G2O_BUILD_EXAMPLES)
   message(STATUS "Compiling g2o examples")
 endif(G2O_BUILD_EXAMPLES)
@@ -476,15 +491,9 @@ endif(MSVC)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${g2o_CXX_FLAGS}")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${g2o_C_FLAGS}")
 
-# Find Eigen3. If it defines the target, this is used. If not,
-# fall back to the using the module form.
+# Find Eigen3
 # See https://eigen.tuxfamily.org/dox/TopicCMakeGuide.html for details
-find_package(Eigen3 3.3 REQUIRED)
-if (TARGET Eigen3::Eigen)
-  set(G2O_EIGEN3_EIGEN_TARGET Eigen3::Eigen)
-else()
-  include_directories(${EIGEN3_INCLUDE_DIR})
-endif ()
+find_package(Eigen3 REQUIRED NO_MODULE)
 
 # Generate config.h
 set(G2O_OPENGL_FOUND ${OPENGL_FOUND})
@@ -508,22 +517,28 @@ WRITE_BASIC_PACKAGE_VERSION_FILE(
     "${G2O_VERSION_CONFIG}" VERSION ${G2O_VERSION} COMPATIBILITY SameMajorVersion
 )
 
-configure_file(config.h.in "${PROJECT_BINARY_DIR}/g2o/config.h")
-install(FILES ${PROJECT_BINARY_DIR}/g2o/config.h DESTINATION ${INCLUDES_DESTINATION}/g2o)
+configure_file(config.h.in "${CMAKE_CURRENT_BINARY_DIR}/g2o/config.h")
+# Only install config.h when this is the top-level project or when explicitly requested
+if(PROJECT_IS_TOP_LEVEL OR G2O_INSTALL_CMAKE_CONFIG)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/g2o/config.h DESTINATION ${INCLUDES_DESTINATION}/g2o)
+endif()
 
 configure_file("${g2o_SOURCE_DIR}/cmake_modules/Config.cmake.in" "${G2O_PROJECT_CONFIG}" @ONLY)
 
-install(
-    FILES "${G2O_PROJECT_CONFIG}" "${G2O_VERSION_CONFIG}"
-    DESTINATION "${G2O_CONFIG_INSTALL_DIR}")
+# Only install cmake config files when this is the top-level project or when explicitly requested
+if(PROJECT_IS_TOP_LEVEL OR G2O_INSTALL_CMAKE_CONFIG)
+  install(
+      FILES "${G2O_PROJECT_CONFIG}" "${G2O_VERSION_CONFIG}"
+      DESTINATION "${G2O_CONFIG_INSTALL_DIR}")
 
-install(
-    EXPORT "${G2O_TARGETS_EXPORT_NAME}"
-    NAMESPACE "${G2O_NAMESPACE}"
-    DESTINATION "${G2O_CONFIG_INSTALL_DIR}")
+  install(
+      EXPORT "${G2O_TARGETS_EXPORT_NAME}"
+      NAMESPACE "${G2O_NAMESPACE}"
+      DESTINATION "${G2O_CONFIG_INSTALL_DIR}")
+endif()
 
-# building unit test framework and our tests
 option(BUILD_UNITTESTS "build unit test framework and the tests" OFF)
+
 if(BUILD_UNITTESTS)
   enable_testing()
   add_subdirectory(unit_test)
@@ -532,8 +547,9 @@ endif()
 # Include the subdirectories
 add_subdirectory(g2o)
 
-# Benchmarks
+
 option(G2O_BUILD_BENCHMARKS "build benchmarks" OFF)
+
 if(G2O_BUILD_BENCHMARKS)
   find_package(benchmark)
   if(${benchmark_FOUND})
