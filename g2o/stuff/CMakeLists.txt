@@ -12,7 +12,7 @@ add_library(stuff ${G2O_LIB_TYPE}
 )
 
 target_include_directories(stuff PUBLIC
-  "$<BUILD_INTERFACE:${g2o_SOURCE_DIR};${PROJECT_BINARY_DIR}>"
+  "$<BUILD_INTERFACE:${g2o_SOURCE_DIR};${g2o_BINARY_DIR}>"
   $<INSTALL_INTERFACE:include/g2o/stuff>
 )
 
@@ -28,7 +28,7 @@ set_target_properties(stuff PROPERTIES
   VERSION ${G2O_LIB_VERSION}
   SOVERSION ${G2O_LIB_SOVERSION})
 target_compile_features(stuff PUBLIC cxx_std_17)
-target_link_libraries(stuff PUBLIC ${G2O_EIGEN3_EIGEN_TARGET})
+target_link_libraries(stuff PUBLIC Eigen3::Eigen)
 
 if (APPLE)
   set_target_properties(stuff PROPERTIES INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
@@ -41,6 +41,9 @@ install(TARGETS stuff
   ARCHIVE DESTINATION ${ARCHIVE_DESTINATION}
   INCLUDES DESTINATION ${INCLUDES_DESTINATION}
 )
+
+# Create alias target for easier usage when included as subdirectory
+add_library(g2o::stuff ALIAS stuff)
 
 # build our OpenGL helper library
 if(OPENGL_FOUND AND G2O_HAVE_OPENGL)
@@ -60,16 +63,19 @@ if(OPENGL_FOUND AND G2O_HAVE_OPENGL)
     )
 
   target_include_directories(opengl_helper PUBLIC
-    "$<BUILD_INTERFACE:${g2o_SOURCE_DIR};${PROJECT_BINARY_DIR}>"
+    "$<BUILD_INTERFACE:${g2o_SOURCE_DIR};${g2o_BINARY_DIR}>"
     $<INSTALL_INTERFACE:include/g2o/stuff>
   )
 
-  target_link_libraries(opengl_helper PUBLIC ${G2O_OPENGL_TARGET} ${G2O_EIGEN3_EIGEN_TARGET})
+  target_link_libraries(opengl_helper PUBLIC ${G2O_OPENGL_TARGET} Eigen3::Eigen)
   target_compile_features(opengl_helper PUBLIC cxx_std_17)
   set_target_properties(opengl_helper PROPERTIES OUTPUT_NAME "${LIB_PREFIX}opengl_helper")
   set_target_properties(opengl_helper PROPERTIES
     VERSION ${G2O_LIB_VERSION}
     SOVERSION ${G2O_LIB_SOVERSION})
+
+  # Create alias target for easier usage when included as subdirectory
+  add_library(g2o::opengl_helper ALIAS opengl_helper)
 endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND NOT ANDROID)
